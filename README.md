@@ -1,6 +1,5 @@
 # HabotConnect — Junior Cloud & DevOps Engineer Hiring Project
-Submitted by: [YOUR FULL NAME]
-Contact: [YOUR EMAIL / PHONE]
+Submitted by:Vineet Tiwari
 
 ## Scenario recap
 A junior developer pushed unencrypted API credentials and caused a schema
