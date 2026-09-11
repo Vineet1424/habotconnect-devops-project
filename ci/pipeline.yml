@@ -1,0 +1,69 @@
+name: Poka-Yoke Build Gate (Fail-Closed)
+
+on:
+  pull_request:
+    branches: [main, staging]
+  push:
+    branches: [main, staging]
+
+jobs:
+  build-gate:
+    name: Lint, Format, and Secret Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install lint and format tools
+        run: pip install black flake8
+
+      # --- Poka-Yoke Rule 1: code must already be correctly formatted ---
+      - name: Format check (Black)
+        run: black --check --diff .
+
+      # --- Poka-Yoke Rule 2: code must pass static lint rules ---
+      - name: Lint check (Flake8)
+        run: flake8 . --max-line-length=100
+
+      # --- Poka-Yoke Rule 3: no raw secrets may ever enter the codebase ---
+      - name: Secret scan (Gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          config-path: ci/.gitleaks.toml
+
+  # Deploy can ONLY run if build-gate succeeded — this is what makes the
+  # gate "fail-closed" rather than "fail-open": a skipped/failed check
+  # blocks deployment by default, it does not default to allowing it.
+  deploy:
+    name: Deploy to GCP App Engine (Staging)
+    needs: build-gate
+    if: needs.build-gate.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Deploy
+        run: echo "Gate passed — proceeding with deployment to staging."
+
+  # If the gate job failed, this job runs instead and makes the failure
+  # visible/actionable rather than letting it silently disappear.
+  quarantine:
+    name: Quarantine Failed Build
+    needs: build-gate
+    if: needs.build-gate.result == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark build as quarantined
+        run: |
+          echo "::error::BUILD QUARANTINED — formatting, lint, or secret scan failed."
+          echo "This commit is BLOCKED from deployment. No manual override path exists."
+          exit 1

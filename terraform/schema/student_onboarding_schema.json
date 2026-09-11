@@ -1,0 +1,13 @@
+[
+  { "name": "student_id", "type": "STRING", "mode": "REQUIRED" },
+  { "name": "full_name", "type": "STRING", "mode": "REQUIRED" },
+  { "name": "date_of_birth", "type": "DATE", "mode": "REQUIRED" },
+  { "name": "guardian_email", "type": "STRING", "mode": "REQUIRED" },
+  { "name": "guardian_phone", "type": "STRING", "mode": "REQUIRED" },
+  { "name": "learning_difficulty_type", "type": "STRING", "mode": "REQUIRED" },
+  { "name": "consent_to_data_processing", "type": "BOOLEAN", "mode": "REQUIRED" },
+  { "name": "requires_one_on_one_support", "type": "BOOLEAN", "mode": "REQUIRED" },
+  { "name": "has_prior_lsa_engagement", "type": "BOOLEAN", "mode": "REQUIRED" },
+  { "name": "assigned_analyst_email", "type": "STRING", "mode": "REQUIRED" },
+  { "name": "ingested_at", "type": "TIMESTAMP", "mode": "REQUIRED" }
+]
